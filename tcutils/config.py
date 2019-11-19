@@ -2,14 +2,18 @@ import sys
 import yaml
 import logging
 
+from marshmallow import Schema
 from marshmallow.exceptions import ValidationError
 
 from tcutils.paths import check_path
 from tcutils.funcutils import class_prefixed_methods
 from tcutils.yamlinclude import IncludeLoader
-from schema.config import ConfigSchema
 
 log = logging.getLogger(__file__)
+
+
+class BaseConfigSchema(Schema):
+    pass
 
 
 class ConfigurationAttribute:
@@ -33,10 +37,10 @@ class ConfigurationAttribute:
 
 
 class Configuration:
-    schema = ConfigSchema
 
-    def __init__(self, config_dict):
+    def __init__(self, config_dict, schema=BaseConfigSchema):
         self.config = config_dict
+        self.schema = schema
         self._parse()
 
     def __str__(self):
