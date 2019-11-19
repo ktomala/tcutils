@@ -3,7 +3,7 @@
 import logging
 import os
 import unicodedata
-from softtrove.const import VALID_FILENAME_CHARS
+from tcutils.const import VALID_FILENAME_CHARS
 
 log = logging.getLogger(__file__)
 
