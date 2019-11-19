@@ -70,14 +70,17 @@ class Configuration:
                 log.error(f'Configuration !include error: {e}')
                 raise e
         if schema_class is None:
-            schema_class = cls.schema
+            schema_class = BaseConfigSchema
         schema = schema_class()
         try:
             result = schema.load(config_dict)
         except ValidationError as e:
             log.error(f'Configuration file error: "{e.args}"')
             raise e
-        return cls(result)
+        if schema_class:
+            return cls(result, schema=schema_class)
+        else:
+            return cls(result)
 
     def _parse(self):
         """Parse configuration and trigger events if necessary."""
