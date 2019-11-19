@@ -1,4 +1,3 @@
-import sys
 import yaml
 import logging
 
@@ -69,7 +68,7 @@ class Configuration:
                 config_dict = yaml.load(fp, IncludeLoader)
             except FileNotFoundError as e:
                 log.error(f'Configuration !include error: {e}')
-                sys.exit(1)
+                raise e
         if schema_class is None:
             schema_class = cls.schema
         schema = schema_class()
@@ -77,7 +76,7 @@ class Configuration:
             result = schema.load(config_dict)
         except ValidationError as e:
             log.error(f'Configuration file error: "{e.args}"')
-            sys.exit(1)
+            raise e
         return cls(result)
 
     def _parse(self):
