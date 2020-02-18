@@ -3,9 +3,7 @@
 import pathlib
 import os
 import typing
-
-UniversalPath = typing.Union[str, pathlib.Path]
-UniversalPathCollection = typing.Iterable[UniversalPath]
+from tcutils.types import UniversalPath, UniversalPathCollection
 
 
 # Path functions

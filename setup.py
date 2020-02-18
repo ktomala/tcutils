@@ -12,6 +12,11 @@ from setuptools import setup, find_packages
 # with open('LICENSE') as f:
 #     license = f.read()
 
+install_requires = [
+    'pyyaml',
+    'marshmallow'
+]
+
 setup(
     name='tcutils',
     version='0.1.0',
@@ -28,4 +33,7 @@ setup(
     #     'init_catalog': babel.init_catalog,
     #     'update_catalog': babel.update_catalog
     # }
+    # python_requires='>=3.6',
+    install_requires=install_requires,
+    # dependency_links=dependencies,
 )
