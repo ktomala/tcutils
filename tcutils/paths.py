@@ -1,21 +1,88 @@
+# -*- coding: utf-8 -*-
+
 import pathlib
 import os
+import typing
+
+UniversalPath = typing.Union[str, pathlib.Path]
+UniversalPathCollection = typing.Iterable[UniversalPath]
 
 
-def normalize_path(path):
-    return os.path.expanduser(os.path.expandvars(path))
+# Path functions
 
 
-def get_current_dir():
-    return os.path.dirname(os.path.abspath(
-        normalize_path(__file__)))
+def normalize_path(
+   path: UniversalPath,
+   use_default_expansion=False,
+   default_expandvars=pathlib.posixpath.expandvars
+) -> pathlib.Path:
+    """Normalize path. If use_default_expansion is True,
+    default_expandvars will be used as variable expansion.
+    """
+    temp_path = pathlib.Path(path)
+    if use_default_expansion:
+        temp_path = default_expandvars(temp_path)
+    else:
+        try:
+            temp_path = path.expandvars(temp_path)
+        except:
+            temp_path = default_expandvars(temp_path)
+    temp_path = temp_path.expanduser(temp_path)
+    return pathlib.resolve(temp_path)
 
 
-def create_dirs(dirs_to_create, parent_dir=None, create_parent=False):
-    parent_dir = normalize_path(parent_dir) if parent_dir \
+def get_path(path: UniversalPath, **normalize_kwargs) -> pathlib.Path:
+    """Alias for normalize_path.
+    """
+    return normalize_path(path, **normalize_kwargs)
+
+
+def check_path(path: UniversalPath, **normalize_kwargs) -> pathlib.Path:
+    """Checks path and return normalized Path.
+    """
+    normalized_path = normalize_path(path, **normalize_kwargs)
+    if not normalized_path.exists():
+        raise IOError(f'Path "{p}" does not exist')
+    return normalized_path
+
+
+def join_paths(*paths: UniversalPathCollection, **normalize_kwargs) -> pathlib.Path:
+    """Joins iterable of paths to one path.
+    """
+    joined_path = normalize_path(paths[0], **normalize_kwargs)
+    for path in paths[1:]:
+        path_part = normalize_path(path, **normalize_kwargs)
+        joined_path = joined_path.joinpath(path_part).resolve()
+    return joined_path
+
+
+# Directory functions
+
+
+def get_current_dir(**normalize_kwargs) -> pathlib.Path:
+    """Return current directory Path based on __file__.
+    """
+    current_dir_path = normalize_path(__file__, **normalize_kwargs)))
+    return current_dir_path.directory
+
+
+def create_dirs(
+    dirs_to_create: UniversalPathCollection,
+    parent_dir: typing.Optional[UniversalPath]=None,
+    create_parent: bool=False
+) -> None:
+    """Create directories.
+
+    If `parent_dir` is specified it will create directories from the list
+    as subfolders of `parent_dir`.
+
+    If `create_parent` is `False`, and
+    `parent_dir` path does not exist function will `raise IOError`, otherwise
+    `parent_dir` will be created.
+    """
+    parent_path = normalize_path(parent_dir) if parent_dir \
         else get_current_dir()
 
-    parent_path = pathlib.Path(parent_dir)
     if not parent_path.exists():
         if create_parent:
             parent_path.mkdir(parents=True, exist_ok=True)
@@ -26,23 +93,3 @@ def create_dirs(dirs_to_create, parent_dir=None, create_parent=False):
         target_path = parent_path.joinpath(pathlib.Path(target_dir)).resolve()
         if not target_path.exists():
             target_path.mkdir(parents=True, exist_ok=True)
-
-
-def check_path(path):
-    p = pathlib.Path(normalize_path(path)).resolve()
-    if not p.exists():
-        raise IOError(f'Path "{p}" does not exist')
-    return p
-
-
-def get_path(path):
-    p = pathlib.Path(normalize_path(path)).resolve()
-    return p
-
-
-def join_paths(*paths):
-    joined_path = pathlib.Path(normalize_path(paths[0])).resolve()
-    for path in paths[1:]:
-        path_part = pathlib.Path(normalize_path(path))
-        joined_path = joined_path.joinpath(path_part).resolve()
-    return joined_path
