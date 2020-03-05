@@ -60,7 +60,7 @@ def join_paths(*paths: UniversalPathCollection, **normalize_kwargs) -> pathlib.P
 def get_current_dir(**normalize_kwargs) -> pathlib.Path:
     """Return current directory Path based on __file__.
     """
-    current_dir_path = normalize_path(__file__, **normalize_kwargs)))
+    current_dir_path = normalize_path(__file__, **normalize_kwargs)
     return current_dir_path.directory
 
 

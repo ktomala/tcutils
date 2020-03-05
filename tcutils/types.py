@@ -7,4 +7,4 @@ import pathlib
 UniversalPath = typing.Union[str, pathlib.Path]
 UniversalPathCollection = typing.Iterable[UniversalPath]
 CharsList = typing.Union[str, typing.List[str]]
-KeywordArgsType = typing.Optional[typing.Dict[str, Any]]
+KeywordArgsType = typing.Optional[typing.Dict[str, typing.Any]]
