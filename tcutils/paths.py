@@ -22,11 +22,12 @@ def normalize_path(
         temp_path = default_expandvars(temp_path)
     else:
         try:
-            temp_path = path.expandvars(temp_path)
+            temp_path = temp_path.expandvars(temp_path)
         except:
             temp_path = default_expandvars(temp_path)
-    temp_path = temp_path.expanduser(temp_path)
-    return pathlib.resolve(temp_path)
+    temp_path = pathlib.Path(temp_path)
+    temp_path = temp_path.expanduser()
+    return temp_path.resolve()
 
 
 def get_path(path: UniversalPath, **normalize_kwargs) -> pathlib.Path:
