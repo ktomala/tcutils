@@ -2,8 +2,16 @@
 
 import pathlib
 import os
+import sys
 import typing
-from tcutils.types import UniversalPath, UniversalPathCollection
+from tcutils.types import UniversalPath, UniversalPathCollection, \
+    KeywordArgsType
+
+
+if sys.platform == 'win32':
+    DEFAULT_EXPANDVARS = pathlib.ntpath.expandvars
+else:
+    DEFAULT_EXPANDVARS = pathlib.posixpath.expandvars
 
 
 # Path functions
@@ -11,8 +19,8 @@ from tcutils.types import UniversalPath, UniversalPathCollection
 
 def normalize_path(
    path: UniversalPath,
-   use_default_expansion=False,
-   default_expandvars=pathlib.posixpath.expandvars
+   use_default_expansion: bool = False,
+   default_expandvars: typing.Callable = DEFAULT_EXPANDVARS
 ) -> pathlib.Path:
     """Normalize path. If use_default_expansion is True,
     default_expandvars will be used as variable expansion.
@@ -30,22 +38,31 @@ def normalize_path(
     return temp_path.resolve()
 
 
-def get_path(path: UniversalPath, **normalize_kwargs) -> pathlib.Path:
+def get_path(
+    path: UniversalPath,
+    **normalize_kwargs: KeywordArgsType,
+) -> pathlib.Path:
     """Alias for normalize_path.
     """
     return normalize_path(path, **normalize_kwargs)
 
 
-def check_path(path: UniversalPath, **normalize_kwargs) -> pathlib.Path:
+def check_path(
+    path: UniversalPath,
+    **normalize_kwargs: KeywordArgsType,
+) -> pathlib.Path:
     """Checks path and return normalized Path.
     """
     normalized_path = normalize_path(path, **normalize_kwargs)
     if not normalized_path.exists():
-        raise IOError(f'Path "{p}" does not exist')
+        raise IOError(f'Path "{path}" does not exist')
     return normalized_path
 
 
-def join_paths(*paths: UniversalPathCollection, **normalize_kwargs) -> pathlib.Path:
+def join_paths(
+    *paths: UniversalPathCollection,
+    **normalize_kwargs: KeywordArgsType,
+) -> pathlib.Path:
     """Joins iterable of paths to one path.
     """
     joined_path = normalize_path(paths[0], **normalize_kwargs)
@@ -58,7 +75,9 @@ def join_paths(*paths: UniversalPathCollection, **normalize_kwargs) -> pathlib.P
 # Directory functions
 
 
-def get_current_dir(**normalize_kwargs) -> pathlib.Path:
+def get_current_dir(
+    **normalize_kwargs: KeywordArgsType,
+) -> pathlib.Path:
     """Return current directory Path based on __file__.
     """
     current_dir_path = normalize_path(__file__, **normalize_kwargs)
@@ -67,8 +86,9 @@ def get_current_dir(**normalize_kwargs) -> pathlib.Path:
 
 def create_dirs(
     dirs_to_create: UniversalPathCollection,
-    parent_dir: typing.Optional[UniversalPath]=None,
-    create_parent: bool=False
+    parent_dir: typing.Optional[UniversalPath] = None,
+    create_parent: bool = False,
+    **normalize_kwargs: KeywordArgsType,
 ) -> None:
     """Create directories.
 
@@ -79,7 +99,7 @@ def create_dirs(
     `parent_dir` path does not exist function will `raise IOError`, otherwise
     `parent_dir` will be created.
     """
-    parent_path = normalize_path(parent_dir) if parent_dir \
+    parent_path = normalize_path(parent_dir, **normalize_kwargs) if parent_dir \
         else get_current_dir()
 
     if not parent_path.exists():

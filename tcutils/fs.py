@@ -13,9 +13,9 @@ log = logging.getLogger(__file__)
 
 def clean_filename(
     filename: str,
-    whitelist: CharsList=VALID_FILENAME_CHARS,
-    replace: CharsList=' ',
-    replacement: str=DEFAULT_REPLACEMENT_CHAR
+    whitelist: CharsList = VALID_FILENAME_CHARS,
+    replace: CharsList = ' ',
+    replacement: str = DEFAULT_REPLACEMENT_CHAR
 ) -> str:
     """Cleans filename according to `whitelist` characters and `replace`
     characters which will be substituted by `replacement` character.
