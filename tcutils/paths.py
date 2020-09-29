@@ -66,9 +66,9 @@ def join_paths(
     """Joins iterable of paths to one path.
     """
     joined_path = normalize_path(paths[0], **normalize_kwargs)
-    for path in paths[1:]:
-        path_part = normalize_path(path, **normalize_kwargs)
-        joined_path = joined_path.joinpath(path_part).resolve()
+    for path_part in paths[1:]:
+        joined_path = joined_path.joinpath(path_part)
+    joined_path = normalize_path(joined_path, **normalize_kwargs)
     return joined_path
 
 

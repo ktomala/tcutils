@@ -9,21 +9,14 @@ from ..context import tcutils
 
 current_user_name = tcutils.user.current_user_name()
 
-POSIX_PATHS = [
-    ("/home/someuser", "/home/someuser", pathlib.PosixPath),
-    ("$HOME", "/home/" + current_user_name, pathlib.PosixPath),
-    ("/usr/lib/python/../../bin/python", "/usr/bin/python", pathlib.PosixPath),
-]
-
 WINDOWS_PATHS = [
-    ("Users/someuser", "Users\\someuser", pathlib.WindowsPath),
-    ("C:\\Users\\someuser", "C:\\Users\\someuser", pathlib.WindowsPath),
-    ("$WINDIR", "C:\\Windows", pathlib.WindowsPath),
-    ("$HOMEPATH", "C:\\Users\\" + current_user_name, pathlib.WindowsPath),
-    ("%HOMEPATH%", "C:\\Users\\" + current_user_name, pathlib.WindowsPath),
+    ("Users/someuser", "Users\\someuser"),
+    ("C:\\Users\\someuser", "C:\\Users\\someuser"),
+    ("$WINDIR", "C:\\Windows"),
+    ("$HOMEPATH", "C:\\Users\\" + current_user_name),
+    ("%HOMEPATH%", "C:\\Users\\" + current_user_name),
     ("$HOMEPATH/AppData/Local/../Roaming/Python",
-    "C:\\Users\\" + current_user_name + "\\AppData\\Roaming\\Python",
-    pathlib.WindowsPath),
+        "C:\\Users\\" + current_user_name + "\\AppData\\Roaming\\Python"),
 ]
 
 WINDOWS_PATHS_EXIST = [
@@ -31,26 +24,13 @@ WINDOWS_PATHS_EXIST = [
     ("C:\\NotExistingDirectoryOne", False),
 ]
 
-
-@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
-class TestPosixPaths:
-
-    @pytest.fixture
-    def default_expandvars(self):
-        return pathlib.posixpath.expandvars
-
-    @pytest.mark.parametrize(
-        "path, result, path_type", POSIX_PATHS
-    )
-    @pytest.mark.parametrize(
-        "use_default_expansion", [True, False]
-    )
-    def test_normalize_path(self, path, result, path_type,
-        use_default_expansion
-    ):
-        normalized_path = tcutils.paths.normalize_path(path,
-            use_default_expansion, default_expandvars)
-        assert normalized_path == path_type(result)
+WINDOWS_PATHS_JOINED = [
+    ("\\Users", "\\Windows", "C:\\Windows"),
+    ("\\Users", "%HOMEPATH%", "C:\\Users\\Users\\" + current_user_name),
+    ("Windows", "%HOMEPATH%", "Windows\\Users\\" + current_user_name),
+    ("%HOMEPATH%", "\\Windows", "C:\\Windows"),
+    ("%WINDIR%\\System32", "..\\System", "C:\\Windows\\System"),
+]
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="does not run on posix")
@@ -60,8 +40,12 @@ class TestWindowsPaths:
     def default_expandvars(self):
         return pathlib.ntpath.expandvars
 
+    @pytest.fixture
+    def path_type(self):
+        return pathlib.WindowsPath
+
     @pytest.mark.parametrize(
-        "path, result, path_type", WINDOWS_PATHS
+        "path, result", WINDOWS_PATHS
     )
     @pytest.mark.parametrize(
         "use_default_expansion", [True, False]
@@ -75,7 +59,7 @@ class TestWindowsPaths:
         assert normalized_path == path_type(result)
 
     @pytest.mark.parametrize(
-        "path, result, path_type", WINDOWS_PATHS
+        "path, result", WINDOWS_PATHS
     )
     @pytest.mark.parametrize(
         "use_default_expansion", [True, False]
@@ -106,3 +90,18 @@ class TestWindowsPaths:
                 return True
             else:
                 raise e
+
+    @pytest.mark.parametrize(
+        "path_one, path_two, result", WINDOWS_PATHS_JOINED
+    )
+    @pytest.mark.parametrize(
+        "use_default_expansion", [True, False]
+    )
+    def test_join_paths(self, path_one, path_two, result, path_type,
+        use_default_expansion, default_expandvars
+    ):
+        joined_path = tcutils.paths.join_paths(path_one, path_two,
+            use_default_expansion=use_default_expansion,
+            default_expandvars=default_expandvars)
+
+        assert joined_path == path_type(result)
