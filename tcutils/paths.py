@@ -75,13 +75,13 @@ def join_paths(
 # Directory functions
 
 
-def get_current_dir(
+def current_dir(
     **normalize_kwargs: KeywordArgsType,
 ) -> pathlib.Path:
-    """Return current directory Path based on __file__.
+    """Return current directory Path.
     """
-    current_dir_path = normalize_path(__file__, **normalize_kwargs)
-    return current_dir_path.directory
+    current_dir_path = normalize_path(pathlib.Path.cwd(), **normalize_kwargs)
+    return current_dir_path
 
 
 def create_dirs(
@@ -100,7 +100,7 @@ def create_dirs(
     `parent_dir` will be created.
     """
     parent_path = normalize_path(parent_dir, **normalize_kwargs) if parent_dir \
-        else get_current_dir()
+        else current_dir()
 
     if not parent_path.exists():
         if create_parent:

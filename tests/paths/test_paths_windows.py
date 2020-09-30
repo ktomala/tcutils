@@ -105,3 +105,21 @@ class TestWindowsPaths:
             default_expandvars=default_expandvars)
 
         assert joined_path == path_type(result)
+
+
+    @pytest.mark.parametrize(
+        "use_default_expansion", [True, False]
+    )
+    def test_current_dir(self, use_default_expansion, default_expandvars):
+        current_dir_path = tcutils.paths.get_current_dir(
+            use_default_expansion=use_default_expansion,
+            default_expandvars=default_expandvars)
+        assert pathlib.Path.cwd() == current_dir_path
+
+    # @pytest.mark.parametrize(
+    #     "use_default_expansion", [True, False]
+    # )
+    # def test_create_dirs(self):
+    #         use_default_expansion=use_default_expansion,
+    #         default_expandvars=default_expandvars)
+    #     pass
