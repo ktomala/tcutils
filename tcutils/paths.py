@@ -89,7 +89,7 @@ def create_dirs(
     parent_dir: typing.Optional[UniversalPath] = None,
     create_parent: bool = False,
     **normalize_kwargs: KeywordArgsType,
-) -> None:
+) -> typing.List[pathlib.Path]:
     """Create directories.
 
     If `parent_dir` is specified it will create directories from the list
@@ -102,13 +102,20 @@ def create_dirs(
     parent_path = normalize_path(parent_dir, **normalize_kwargs) if parent_dir \
         else current_dir()
 
+    created_paths = []
+
     if not parent_path.exists():
         if create_parent:
             parent_path.mkdir(parents=True, exist_ok=True)
         else:
             raise IOError(f'Path "{parent_path}" does not exist')
+    if create_parent:
+        created_paths.append(parent_path)
 
     for target_dir in dirs_to_create:
         target_path = parent_path.joinpath(pathlib.Path(target_dir)).resolve()
         if not target_path.exists():
             target_path.mkdir(parents=True, exist_ok=True)
+        created_paths.append(target_path)
+
+    return created_paths

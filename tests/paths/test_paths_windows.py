@@ -32,6 +32,14 @@ WINDOWS_PATHS_JOINED = [
     ("%WINDIR%\\System32", "..\\System", "C:\\Windows\\System"),
 ]
 
+WINDOWS_PATHS_CREATE = [
+    (("tcutils-tests",), "%TEMP%", False),
+    (("tcutils-tests/one", "tcutils-tests/two", "tcutils-tests/three"), "%TEMP%", False),
+    (("tcutils-tests-2/one/two", "tcutils-tests/one/three",), "%TEMP%", False),
+    (("tcutils-tests/two/one", "tcutils-tests/one/three",),
+    "%TEMP%\\tcutils-tests-3", True),
+]
+
 
 @pytest.mark.skipif(sys.platform != "win32", reason="does not run on posix")
 class TestWindowsPaths:
@@ -111,15 +119,36 @@ class TestWindowsPaths:
         "use_default_expansion", [True, False]
     )
     def test_current_dir(self, use_default_expansion, default_expandvars):
-        current_dir_path = tcutils.paths.get_current_dir(
+        current_dir_path = tcutils.paths.current_dir(
             use_default_expansion=use_default_expansion,
             default_expandvars=default_expandvars)
         assert pathlib.Path.cwd() == current_dir_path
 
-    # @pytest.mark.parametrize(
-    #     "use_default_expansion", [True, False]
-    # )
-    # def test_create_dirs(self):
-    #         use_default_expansion=use_default_expansion,
-    #         default_expandvars=default_expandvars)
-    #     pass
+
+    @pytest.mark.parametrize(
+        "dirs_to_create, parent_dir, create_parent", WINDOWS_PATHS_CREATE
+    )
+    @pytest.mark.parametrize(
+        "use_default_expansion", [True, False]
+    )
+    def test_create_dirs(self, dirs_to_create, parent_dir, create_parent,
+        use_default_expansion, default_expandvars
+    ):
+        created_paths = tcutils.paths.create_dirs(dirs_to_create,
+            parent_dir, create_parent,
+            use_default_expansion=use_default_expansion,
+            default_expandvars=default_expandvars)
+        parent_path = tcutils.paths.check_path(parent_dir)
+        result_paths = [parent_path / x for x in dirs_to_create]
+        if create_parent:
+            result_paths.insert(0, parent_path)
+        try:
+            assert created_paths == result_paths
+        finally:
+            result_paths.sort()
+            # Cleanup
+            for result_path in result_paths:
+                try:
+                    result_path.rmdir()
+                except IOError:
+                    pass

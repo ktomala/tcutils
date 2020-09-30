@@ -77,13 +77,13 @@ class Configuration:
 
     @classmethod
     def load(
-        cls,
+        cls: typing.Any,
         config_path: UniversalPath,
         schema_class: typing.Optional[BaseConfigSchema] = None
     ):
         """Load configuration file."""
         p = check_path(config_path)
-        with open(p, 'r') as fp:
+        with p.open('r') as fp:
             try:
                 config_dict = yaml.load(fp, IncludeLoader)
             except FileNotFoundError as e:
