@@ -119,3 +119,33 @@ def create_dirs(
         created_paths.append(target_path)
 
     return created_paths
+
+
+# File functions
+
+
+def check_file_exists_or_increment(
+    filepath: UniversalPath,
+    **normalize_kwargs: KeywordArgsType
+) -> pathlib.Path:
+    """Return file path with incremented suffix, if `filepath` already exists.
+    Will search for first available number suffix, if previous ones are already
+    existing, e.g. `FILENAME_1.EXTENSION`.
+    """
+    number = 1
+    temp_path = normalize_path(filepath, **normalize_kwargs)
+    if temp_path.exists():
+        filepath_ext = temp_path.suffix
+        filepath_root = str(temp_path)[:-len(str(filepath_ext))] 
+        # FIXME: This is inefficient, should list all files and choose
+        #        correct number
+        while 1:
+            new_filepath_root = filepath_root + '_' + str(number)
+            new_filepath = pathlib.Path(new_filepath_root + filepath_ext)
+            if new_filepath.exists():
+                number += 1
+                continue
+            else:
+                filepath = new_filepath
+                break
+    return filepath

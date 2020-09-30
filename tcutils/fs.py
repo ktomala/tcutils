@@ -22,7 +22,7 @@ def clean_filename(
     """
     # Replace spaces (or characters defined by replace)
     for r in replace:
-        filename = filename.replace(r, '_')
+        filename = filename.replace(r, replacement)
 
     # Keep only valid ASCII chars
     cleaned_filename = unicodedata.normalize(
@@ -30,29 +30,3 @@ def clean_filename(
 
     # Keep only whitelisted chars
     return ''.join(c for c in cleaned_filename if c in whitelist)
-
-
-def check_file_exists_or_increment(
-    filepath: UniversalPath,
-    **normalize_kwargs: KeywordArgsType
-) -> pathlib.Path:
-    """Return file path with incremented suffix, if `filepath` already exists.
-    Will search for first available number suffix, if previous ones are already
-    existing, e.g. `FILENAME_1.EXTENSION`.
-    """
-    number = 1
-    temp_path = normalize_path(filepath)
-    if temp_path.exists():
-        filepath_root, filepath_ext = temp_path.splitext()
-        # FIXME: This is inefficient, should list all files and choose
-        #        correct number
-        while 1:
-            new_filepath_root = filepath_root + '_' + str(number)
-            new_filepath = pathlib.Path(new_filepath_root + filepath_ext)
-            if new_filepath.exists():
-                number += 1
-                continue
-            else:
-                filepath = new_filepath
-                break
-    return filepath

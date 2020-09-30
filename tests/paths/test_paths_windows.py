@@ -40,6 +40,10 @@ WINDOWS_PATHS_CREATE = [
     "%TEMP%\\tcutils-tests-3", True),
 ]
 
+WINDOWS_CHECK_FILE_INCREMENT = [
+    ('', ''),
+]
+
 
 @pytest.mark.skipif(sys.platform != "win32", reason="does not run on posix")
 class TestWindowsPaths:
@@ -152,3 +156,18 @@ class TestWindowsPaths:
                     result_path.rmdir()
                 except IOError:
                     pass
+
+
+    @pytest.mark.parametrize(
+        "filepath, result", WINDOWS_CHECK_FILE_INCREMENT
+    )
+    @pytest.mark.parametrize(
+        "use_default_expansion", [True, False]
+    )
+    def test_check_file_exists_or_increment(self, filepath, result,
+        use_default_expansion, default_expandvars
+    ):
+        new_filepath = tcutils.paths.check_file_exists_or_increment(filepath,
+            use_default_expansion=use_default_expansion,
+            default_expandvars=default_expandvars)
+        assert new_filepath == result
