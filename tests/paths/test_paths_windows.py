@@ -41,7 +41,7 @@ WINDOWS_PATHS_CREATE = [
 ]
 
 WINDOWS_CHECK_FILE_INCREMENT = [
-    ('', ''),
+    ("", ""),
 ]
 
 

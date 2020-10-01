@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'pyyaml',
-    'marshmallow'
+    'marshmallow',
 ]
 
 setup(
