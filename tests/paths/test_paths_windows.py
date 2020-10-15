@@ -41,7 +41,7 @@ WINDOWS_PATHS_CREATE = [
 ]
 
 WINDOWS_CHECK_FILE_INCREMENT = [
-    ("", ""),
+    ("%WINDIR%\\System32\\drivers\\etc\\hosts", "C:\\Windows\\System32\\drivers\\etc\\hosts_1"),
 ]
 
 
@@ -170,4 +170,4 @@ class TestWindowsPaths:
         new_filepath = tcutils.paths.check_file_exists_or_increment(filepath,
             use_default_expansion=use_default_expansion,
             default_expandvars=default_expandvars)
-        assert new_filepath == result
+        assert new_filepath == pathlib.WindowsPath(result)

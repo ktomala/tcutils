@@ -136,7 +136,10 @@ def check_file_exists_or_increment(
     temp_path = normalize_path(filepath, **normalize_kwargs)
     if temp_path.exists():
         filepath_ext = temp_path.suffix
-        filepath_root = str(temp_path)[:-len(str(filepath_ext))] 
+        if filepath_ext:
+            filepath_root = str(temp_path)[:-len(str(filepath_ext))]
+        else:
+            filepath_root = str(temp_path)
         # FIXME: This is inefficient, should list all files and choose
         #        correct number
         while 1:
