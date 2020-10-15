@@ -29,7 +29,7 @@ class TestPosixPaths:
         "use_default_expansion", [True, False]
     )
     def test_normalize_path(self, path, result, path_type,
-        use_default_expansion
+        use_default_expansion, default_expandvars
     ):
         normalized_path = tcutils.paths.normalize_path(path,
             use_default_expansion, default_expandvars)
