@@ -1,0 +1,6 @@
+base:
+  somevar: "test"
+  somelist:
+    - one
+    - two
+  included: !include included.yaml
