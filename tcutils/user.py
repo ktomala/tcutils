@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pwd
 import os
 
