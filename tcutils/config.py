@@ -35,15 +35,20 @@ class ConfigurationAttribute:
         return str(self.value)
 
     def __getattr__(self, attr_name) -> typing.Any:
+        attr_suffix = None
+        if attr_name.find('.') > -1:
+            attr_name, attr_suffix = attr_name.split('.', 1)
         if attr_name not in dir(self):
             if attr_name not in object.__getattribute__(self, 'value'):
                 raise AttributeError(f'No such attribute: {attr_name}')
             attr_value = getattr(self, 'value').get(attr_name)
             if type(attr_value) is dict:
-                return ConfigurationAttribute(attr_value)
-            else:
-                return attr_value
-        return super().__getattribute__(attr_name)
+                attr_value = ConfigurationAttribute(attr_value)
+        else:
+            attr_value = super().__getattribute__(attr_name)
+        if attr_suffix:
+            attr_value = getattr(attr_value, attr_suffix)
+        return attr_value
 
 
 class Configuration:
@@ -65,22 +70,29 @@ class Configuration:
         return self.config.get(k)
 
     def __getattr__(self, attr_name: str) -> typing.Any:
+        attr_suffix = None
+        if attr_name.find('.') > -1:
+            attr_name, attr_suffix = attr_name.split('.', 1)
         if attr_name not in dir(self):
             if attr_name not in object.__getattribute__(self, 'config'):
                 raise AttributeError(f'No such attribute: {attr_name}')
             attr_value = getattr(self, 'config').get(attr_name)
             if type(attr_value) is dict:
-                return ConfigurationAttribute(attr_value)
-            else:
-                return attr_value
-        return super().__getattribute__(attr_name)
+                attr_value = ConfigurationAttribute(attr_value)
+        else:
+            attr_value = super().__getattribute__(attr_name)
+        if attr_suffix:
+            attr_value = getattr(attr_value, attr_suffix)
+        return attr_value
 
     @classmethod
     def load(
-        cls: typing.Any,
+        cls: typing.Type[typing.Any],
         config_path: UniversalPath,
-        schema_class: typing.Optional[BaseConfigSchema] = None
-    ):
+        schema_class: typing.Optional[BaseConfigSchema] = None,
+        *schema_args: typing.Iterable[typing.Any],
+        **schema_kwargs: typing.Mapping[typing.Any, typing.Any],
+    ) -> typing.Type[typing.Any]:
         """Load configuration file."""
         p = check_path(config_path)
         with p.open('r') as fp:
@@ -91,7 +103,7 @@ class Configuration:
                 raise e
         if schema_class is None:
             schema_class = BaseConfigSchema
-        schema = schema_class()
+        schema = schema_class(*schema_args, **schema_kwargs)
         try:
             result = schema.load(config_dict)
         except ValidationError as e:
@@ -102,7 +114,7 @@ class Configuration:
         else:
             return cls(result)
 
-    def _parse(self) -> None:
+    def _parse(self):
         """Parse configuration and trigger events if necessary."""
         parsing_methods = class_prefixed_methods(self.__class__, '_parse_')
         for parsing_method in parsing_methods:
