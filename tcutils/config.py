@@ -28,7 +28,7 @@ class BaseConfigSchema(Schema):
 class ConfigurationAttribute:
     """Configuration attribute for easy access."""
 
-    def __init__(self, value):
+    def __init__(self, value: typing.Any):
         self.value = value
 
     def __str__(self) -> str:
