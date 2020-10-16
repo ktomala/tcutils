@@ -44,6 +44,19 @@ class TestConfig:
     @pytest.mark.parametrize(
         "item, result", CONFIG_ITEMS
     )
-    def test_configuration_item_access(self, dummy_configuration, item, result):
+    def test_configuration_attr_access(self, dummy_configuration, item, result):
         item_attr = getattr(dummy_configuration, item)
+        assert item_attr == result
+
+    @pytest.mark.parametrize(
+        "item, result", CONFIG_ITEMS
+    )
+    def test_configuration_item_access(self, dummy_configuration, item, result):
+        if item.find('.') > -1:
+            items = item.split('.')
+        else:
+            items = [item]
+        item_attr = dummy_configuration
+        for item_part in items:
+            item_attr = item_attr[item_part]
         assert item_attr == result
