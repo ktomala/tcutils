@@ -5,6 +5,7 @@ import os
 import unicodedata
 import pathlib
 import typing
+from dataclasses import dataclass
 from tcutils.const import VALID_FILENAME_CHARS, DEFAULT_REPLACEMENT_CHAR
 from tcutils.types import CharsList, UniversalPath, KeywordArgsType
 from tcutils.paths import normalize_path
