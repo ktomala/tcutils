@@ -5,6 +5,7 @@ import os
 import unicodedata
 import pathlib
 import typing
+import tempfile
 from dataclasses import dataclass
 from tcutils.const import VALID_FILENAME_CHARS, DEFAULT_REPLACEMENT_CHAR
 from tcutils.types import CharsList, UniversalPath, KeywordArgsType
@@ -48,8 +49,10 @@ class PosixPermissions:
     sticky: bool = False
 
     @classmethod
-    def from_octal(cls, perm_octet: str):
+    def from_octal(cls, perm_octet: typing.Union[str, int]):
         sticky = False
+        if type(perm_octet) == int:
+            perm_octet = str(perm_octet)
         if len(perm_octet) > 4 or len(perm_octet) < 3:
             raise ValueError('Permissions must be in POSIX octal format.')
         elif len(perm_octet) == 4:
@@ -62,6 +65,11 @@ class PosixPermissions:
             sticky = sticky
         )
 
+    @classmethod
+    def from_stat(cls, stat_mode: int):
+        perm_octet = oct(stat_mode)[-4:]
+        return cls.from_octal(perm_octet)
+
     def to_octal_str(self):
         octet_list = [
             1 if self.sticky else 0,
@@ -73,6 +81,12 @@ class PosixPermissions:
 
     def to_octal(self):
         return int(self.to_octal_str(), 8)
+
+    def apply(self, path: UniversalPath):
+        """Apply permissions to path."""
+        if type(path) == str:
+            path = pathlib.Path(path)
+        path.chmod(self.to_octal())
 
 
 def clean_filename(
@@ -94,3 +108,13 @@ def clean_filename(
 
     # Keep only whitelisted chars
     return ''.join(c for c in cleaned_filename if c in whitelist)
+
+
+def temp_dir():
+    """Return temporary directory."""
+    return tempfile.TemporaryDirectory()
+
+
+def temp_file():
+    """Return temporary file."""
+    return tempfile.NamedTemporaryFile()

@@ -4,6 +4,7 @@ import pathlib
 import os
 import sys
 import typing
+import tempfile
 from tcutils.types import UniversalPath, UniversalPathCollection, \
     KeywordArgsType
 
@@ -119,6 +120,12 @@ def create_dirs(
         created_paths.append(target_path)
 
     return created_paths
+
+
+def temp_system_dir_path():
+    """Return temporary system directory path."""
+    temp_file = tempfile.TemporaryFile()
+    return pathlib.Path(tempfile.tempdir)
 
 
 # File functions

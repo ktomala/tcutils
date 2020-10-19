@@ -34,3 +34,7 @@ class TestPosixPaths:
         normalized_path = tcutils.paths.normalize_path(path,
             use_default_expansion, default_expandvars)
         assert normalized_path == path_type(result)
+
+    def test_temp_system_dir_path(self):
+        temp_dir = tcutils.paths.temp_system_dir_path()
+        assert pathlib.Path('/tmp') == temp_dir

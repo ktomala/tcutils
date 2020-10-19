@@ -20,24 +20,24 @@ FS_CLEAN_FILENAMES = [
 ]
 
 POSIX_PERM_TRIAD_TEST = [
-    (False, False, False, 0x0),
-    (False, False, True, 0x1),
-    (False, True, False, 0x2),
-    (True, False, False, 0x4),
-    (False, True, True, 0x3),
-    (True, False, True, 0x5),
-    (True, True, False, 0x6),
-    (True, True, True, 0x7),
+    (False, False, False, 0o0),
+    (False, False, True, 0o1),
+    (False, True, False, 0o2),
+    (True, False, False, 0o4),
+    (False, True, True, 0o3),
+    (True, False, True, 0o5),
+    (True, True, False, 0o6),
+    (True, True, True, 0o7),
 ]
 POSIX_PERM_TRIAD_TEST_STR = [
-    ('0', 0x0),
-    ('1', 0x1),
-    ('2', 0x2),
-    ('4', 0x4),
-    ('3', 0x3),
-    ('5', 0x5),
-    ('6', 0x6),
-    ('7', 0x7),
+    ('0', 0o0),
+    ('1', 0o1),
+    ('2', 0o2),
+    ('4', 0o4),
+    ('3', 0o3),
+    ('5', 0o5),
+    ('6', 0o6),
+    ('7', 0o7),
 ]
 POSIX_PERM_TEST_STR = [
     ('000', '0000'),
@@ -51,7 +51,18 @@ POSIX_PERM_TEST_STR = [
     ('700', '0700'),
     ('1777', '1777'),
 ]
-
+POSIX_PERM_TEST_STAT = [
+    (33152, '0600'),
+    (33700, '1644'),
+    (32876, '0154'),
+]
+POSIX_PERM_TEST_OCTET = [
+    '0600',
+    '0640',
+    '0644',
+    '0750',
+    '1755',
+]
 
 class TestFS:
 
@@ -88,6 +99,24 @@ class TestFS:
     def test_posix_perm_to_octal(self, input_str, octet):
         perm = tcutils.fs.PosixPermissions.from_octal(input_str)
         assert int(octet, 8) == perm.to_octal()
+
+    @pytest.mark.parametrize(
+        "stat_mode, octet", POSIX_PERM_TEST_STAT
+    )
+    def test_posix_perm_stat(self, stat_mode, octet):
+        perm = tcutils.fs.PosixPermissions.from_stat(stat_mode)
+        assert octet == perm.to_octal_str()
+
+    @pytest.mark.parametrize(
+        "octet", POSIX_PERM_TEST_OCTET
+    )
+    def test_posix_perm_apply_file(self, octet):
+        temp_file = tcutils.fs.temp_file()
+        temp_file_path = pathlib.Path(temp_file.name)
+        perm = tcutils.fs.PosixPermissions.from_octal(octet)
+        perm.apply(temp_file_path)
+        temp_file_perms = oct(temp_file_path.stat().st_mode)[-4:]
+        assert temp_file_perms == perm.to_octal_str()
 
     @pytest.mark.parametrize(
         "filename, whitelist, replace, replacement, result", FS_CLEAN_FILENAMES

@@ -171,3 +171,7 @@ class TestWindowsPaths:
             use_default_expansion=use_default_expansion,
             default_expandvars=default_expandvars)
         assert new_filepath == pathlib.WindowsPath(result)
+
+    def test_temp_system_dir_path(self):
+        temp_dir = tcutils.paths.temp_system_dir_path()
+        assert normalize_path('%TEMP%') == temp_dir
