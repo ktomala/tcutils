@@ -80,7 +80,14 @@ class TestFS:
     )
     def test_posix_perm(self, input_str, octet):
         perm = tcutils.fs.PosixPermissions.from_octal(input_str)
-        assert octet == perm.to_octal()
+        assert octet == perm.to_octal_str()
+
+    @pytest.mark.parametrize(
+        "input_str, octet", POSIX_PERM_TEST_STR
+    )
+    def test_posix_perm_to_octal(self, input_str, octet):
+        perm = tcutils.fs.PosixPermissions.from_octal(input_str)
+        assert int(octet, 8) == perm.to_octal()
 
     @pytest.mark.parametrize(
         "filename, whitelist, replace, replacement, result", FS_CLEAN_FILENAMES

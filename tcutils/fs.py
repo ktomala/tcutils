@@ -62,7 +62,7 @@ class PosixPermissions:
             sticky = sticky
         )
 
-    def to_octal(self):
+    def to_octal_str(self):
         octet_list = [
             1 if self.sticky else 0,
             self.owner.to_octal(),
@@ -70,6 +70,9 @@ class PosixPermissions:
             self.world.to_octal(),
         ]
         return ''.join([str(octet) for octet in octet_list])
+
+    def to_octal(self):
+        return int(self.to_octal_str(), 8)
 
 
 def clean_filename(
