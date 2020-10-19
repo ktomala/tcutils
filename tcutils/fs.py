@@ -2,6 +2,8 @@
 
 import logging
 import os
+import sys
+import io
 import unicodedata
 import pathlib
 import typing
@@ -94,9 +96,6 @@ class PosixPermissions:
     def __str__(self):
         return self.to_octal_str()
 
-    def __repr__(self):
-        return f"{self.__class__.__name}<'{self.to_octal_str()}'>"
-
 
 def clean_filename(
     filename: str,
@@ -132,9 +131,16 @@ def temp_file() -> tempfile.NamedTemporaryFile:
 def open_uri(
     uri: str,
     default_uri_scheme: str=DEFAULT_URI_SCHEME,
+    default_input_stream: io.StringIO=sys.stdin,
     *args, **kwargs
-) -> urllib.response.addinfourl:
+) -> typing.Union[urllib.response.addinfourl, io.StringIO]:
     """Open URI and return stream handle."""
+    if uri == '-':
+        # Reading from stream
+        if not hasattr(default_input_stream, 'name'):
+            default_input_stream.name = '<stream>'
+        return default_input_stream
+    # Reading from URI
     parsed_uri = urllib.request.urlparse(uri)
     if parsed_uri.scheme == '':
         parsed_uri = parsed_uri._replace(scheme=default_uri_scheme)
