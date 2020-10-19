@@ -6,8 +6,11 @@ import unicodedata
 import pathlib
 import typing
 import tempfile
+import urllib.request
+import urllib.response
 from dataclasses import dataclass
-from tcutils.const import VALID_FILENAME_CHARS, DEFAULT_REPLACEMENT_CHAR
+from tcutils.const import VALID_FILENAME_CHARS, DEFAULT_REPLACEMENT_CHAR, \
+    DEFAULT_URI_SCHEME
 from tcutils.types import CharsList, UniversalPath, KeywordArgsType
 from tcutils.paths import normalize_path
 
@@ -88,6 +91,12 @@ class PosixPermissions:
             path = pathlib.Path(path)
         path.chmod(self.to_octal())
 
+    def __str__(self):
+        return self.to_octal_str()
+
+    def __repr__(self):
+        return f"{self.__class__.__name}<'{self.to_octal_str()}'>"
+
 
 def clean_filename(
     filename: str,
@@ -110,11 +119,23 @@ def clean_filename(
     return ''.join(c for c in cleaned_filename if c in whitelist)
 
 
-def temp_dir():
+def temp_dir() -> tempfile.TemporaryDirectory:
     """Return temporary directory."""
     return tempfile.TemporaryDirectory()
 
 
-def temp_file():
+def temp_file() -> tempfile.NamedTemporaryFile:
     """Return temporary file."""
     return tempfile.NamedTemporaryFile()
+
+
+def open_uri(
+    uri: str,
+    default_uri_scheme: str=DEFAULT_URI_SCHEME,
+    *args, **kwargs
+) -> urllib.response.addinfourl:
+    """Open URI and return stream handle."""
+    parsed_uri = urllib.request.urlparse(uri)
+    if parsed_uri.scheme == '':
+        parsed_uri = parsed_uri._replace(scheme=default_uri_scheme)
+    return urllib.request.urlopen(parsed_uri.geturl(), *args, **kwargs)
