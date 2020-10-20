@@ -36,7 +36,7 @@ setup(
     #     'init_catalog': babel.init_catalog,
     #     'update_catalog': babel.update_catalog
     # }
-    # python_requires='>=3.6',
+    python_requires='>=3.6',
     install_requires=install_requires,
     # dependency_links=dependencies,
 )
