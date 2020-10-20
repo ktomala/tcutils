@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 """Setup for tcutils."""
 
@@ -8,9 +11,9 @@ from setuptools import setup, find_packages
 
 # with open('README.rst') as f:
 #     readme = f.read()
-#
-# with open('LICENSE') as f:
-#     license = f.read()
+
+with open('LICENSE') as f:
+    license = f.read()
 
 install_requires = [
     'pyyaml',
@@ -24,8 +27,8 @@ setup(
     # long_description=readme,
     author='Karol Tomala',
     author_email='ktomala@tropicoders.pl',
-    # url='https://your_project.com',
-    # license=license,
+    url='https://github.com/ktomala/tcutils',
+    license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     # cmdclass={
     #     'compile_catalog': babel.compile_catalog,
