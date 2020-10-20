@@ -1,2 +1,3 @@
 pyyaml
 marshmallow
+click
