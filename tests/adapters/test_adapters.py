@@ -25,9 +25,13 @@ class TestAdapters:
             'tcutils.tests.adapters.test_adapters']
         assert some_adapter_manager.adapter_class == SomeAdapter
 
-    def test_adapter_manager_register(self, some_adapter_manager):
+    def test_adapter_manager_register_get_remove(self, some_adapter_manager):
         some_adapter_manager.register(SomeAdapter)
         assert SomeAdapter.name in some_adapter_manager.list()
+        adapter = some_adapter_manager.get('SomeAdapter')
+        assert isinstance(adapter, SomeAdapter)
+        some_adapter_manager.remove(SomeAdapter)
+        assert SomeAdapter.name not in some_adapter_manager.list()
 
     def test_adapter_manager_scan(self, some_adapter_manager):
         some_adapter_manager.scan([
@@ -35,3 +39,9 @@ class TestAdapters:
             'tests.adapters.test_adapters'
         ])
         assert SomeAdapter.name in some_adapter_manager.list()
+
+    def test_adapter_manager_execute(self, some_adapter_manager):
+        adapter = SomeAdapter
+        some_adapter_manager.register(adapter)
+        result = some_adapter_manager.execute(adapter)
+        assert result == 'SomeAdapter executing'

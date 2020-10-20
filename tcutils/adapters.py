@@ -32,14 +32,17 @@ class BaseAdapterManager(abc.ABC):
     name: str
     namespaces: AdapterManagerNamespaces
     adapter_class: typing.Type[BaseAdapter]
-    adapter_dict: typing.Dict[str, typing.Type[BaseAdapter]] = field(
+    adapter_dict: typing.Dict[str, BaseAdapter] = field(
         default_factory=dict)
 
     @staticmethod
     def _get_adapter_name(adapter_name_or_class: AdapterNameOrClass):
         """Return adapter name from either name or adapter class itself.
         """
-        if issubclass(adapter_name_or_class, BaseAdapter):
+        if type(adapter_name_or_class) is not str:
+            if not issubclass(adapter_name_or_class, BaseAdapter):
+                raise ValueError(
+                    f'"{adapter_name_or_class}" is not BaseAdapter type.')
             adapter_name = adapter_name_or_class.name
         else:
             adapter_name = adapter_name_or_class
