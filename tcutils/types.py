@@ -10,9 +10,11 @@ import typing
 import pathlib
 import click
 
+from tcutils.adapters import BaseAdapter
 
 UniversalPath = typing.Union[str, pathlib.Path]
 UniversalPathCollection = typing.Iterable[UniversalPath]
 CharsList = typing.Union[str, typing.List[str]]
 KeywordArgsType = typing.Optional[typing.Dict[str, typing.Any]]
 ClickGroupOrCommand = typing.Union[click.Group, click.Command]
+AdapterNameOrClass = typing.Union[str, typing.Type[BaseAdapter]]

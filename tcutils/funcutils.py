@@ -6,8 +6,8 @@
 # Copyright (c) 2019-2020 TropiCoders Karol Tomala
 #
 
-import types
 import typing
+import inspect
 
 from tcutils.const import CLASS_METHOD_TYPES
 
@@ -26,3 +26,17 @@ def class_prefixed_methods(cls: typing.Any, prefix: str) -> typing.List[str]:
     """
     methods = class_methods(cls)
     return list(filter(lambda x: x.startswith(prefix), methods))
+
+
+def module_classes(
+    module: types.ModuleType,
+    class_type: typing.Optional[str] = None
+):
+    """Return list of module classes.
+
+    Optionally filter by `class_type`.
+    """
+    class_list = inspect.getmembers(module, inspect.isclass)
+    if class_type:
+        class_list = [cls for cls in class_list if issubclass(cls, class_type)]
+    return class_list

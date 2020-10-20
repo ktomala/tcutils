@@ -16,3 +16,5 @@ DEFAULT_REPLACEMENT_CHAR = '_'
 CLASS_METHOD_TYPES = [types.FunctionType, classmethod, staticmethod]
 
 DEFAULT_URI_SCHEME = 'file'
+
+DEFAULT_ADAPTER_METHOD = 'execute'
