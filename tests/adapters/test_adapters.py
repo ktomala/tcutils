@@ -10,6 +10,28 @@ import pytest
 
 from ..context import tcutils
 
+from .someadapter import SomeAdapter, SomeAdapterManager
+
 
 class TestAdapters:
-    pass
+
+    @pytest.fixture
+    def some_adapter_manager(self):
+        return SomeAdapterManager()
+
+    def test_adapter_manager(self, some_adapter_manager):
+        assert some_adapter_manager.name == 'SomeAdapterManager'
+        assert some_adapter_manager.namespaces == [
+            'tcutils.tests.adapters.test_adapters']
+        assert some_adapter_manager.adapter_class == SomeAdapter
+
+    def test_adapter_manager_register(self, some_adapter_manager):
+        some_adapter_manager.register(SomeAdapter)
+        assert SomeAdapter.name in some_adapter_manager.list()
+
+    def test_adapter_manager_scan(self, some_adapter_manager):
+        some_adapter_manager.scan([
+            'tcutils.tests.adapters.someadapter',
+            'tests.adapters.test_adapters'
+        ])
+        assert SomeAdapter.name in some_adapter_manager.list()

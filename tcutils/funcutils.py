@@ -7,6 +7,7 @@
 #
 
 import typing
+import types
 import inspect
 
 from tcutils.const import CLASS_METHOD_TYPES
@@ -36,7 +37,7 @@ def module_classes(
 
     Optionally filter by `class_type`.
     """
-    class_list = inspect.getmembers(module, inspect.isclass)
+    class_list = [item[1] for item in inspect.getmembers(module, inspect.isclass)]
     if class_type:
         class_list = [cls for cls in class_list if issubclass(cls, class_type)]
     return class_list

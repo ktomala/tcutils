@@ -9,10 +9,10 @@
 import abc
 import typing
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from tcutils.const import DEFAULT_ADAPTER_METHOD
-from tcutils.types import AdapterNameOrClass
+from tcutils.types import AdapterNameOrClass, AdapterManagerNamespaces
 from tcutils.funcutils import module_classes
 
 
@@ -20,7 +20,7 @@ from tcutils.funcutils import module_classes
 class BaseAdapter(abc.ABC):
     name: str
 
-    @abstractmethod
+    @abc.abstractmethod
     def execute(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -29,10 +29,11 @@ class BaseAdapter(abc.ABC):
 class BaseAdapterManager(abc.ABC):
     """AdapterManager abstract base class.
     """
-    manager_name: str
-    namespaces: typing.Union[str, typing.List[str]]
+    name: str
+    namespaces: AdapterManagerNamespaces
     adapter_class: typing.Type[BaseAdapter]
-    adapter_dict: typing.Dict[str, typing.Type[BaseAdapter]] = {}
+    adapter_dict: typing.Dict[str, typing.Type[BaseAdapter]] = field(
+        default_factory=dict)
 
     @staticmethod
     def _get_adapter_name(adapter_name_or_class: AdapterNameOrClass):
@@ -53,6 +54,22 @@ class BaseAdapterManager(abc.ABC):
             raise ValueError(f'Adapter "{adapter_name}" is not registered.')
         return self.adapter_dict.get(adapter_name)
 
+    def list(self, objects=False):
+        """Return list of registered adapters.
+
+        If objects=True return Adapter instances
+        """
+        if objects:
+            result = []
+            for item in self.adapter_dict.values():
+                if type(item) is list:
+                    result.extend(item)
+                else:
+                    result.append(item)
+            return result
+        else:
+            return list(self.adapter_dict.keys())
+
     def execute(self,
         adapter_name_or_class: AdapterNameOrClass,
         method: typing.Optional[str] = None,
@@ -67,7 +84,7 @@ class BaseAdapterManager(abc.ABC):
         if method:
             if not hasattr(adapter_object, method):
                 raise ValueError(
-                    f'`{adapter_object}.{method}` does not exist.`)
+                    f'`{adapter_object}.{method}` does not exist.')
             adapter_method = getattr(adapter_object, method)
         else:
             adapter_method = getattr(adapter_object, DEFAULT_ADAPTER_METHOD)
@@ -81,7 +98,8 @@ class BaseAdapterManager(abc.ABC):
     def register(self,
         adapter_class: typing.Type[BaseAdapter],
         allow_multiple: bool=False,
-        allow_substitute: bool=False
+        allow_substitute: bool=False,
+        *args, **kwargs
     ):
         """Register `adapter_class` in manager.
         """
@@ -90,12 +108,13 @@ class BaseAdapterManager(abc.ABC):
             if type(self.adapter_dict[adapter_name]) is not list:
                 self.adapter_dict[adapter_name] = [
                     self.adapter_dict[adapter_name]]
-            self.adapter_dict[adapter_name].append(adapter_class)
+            self.adapter_dict[adapter_name].append(
+                adapter_class(*args, **kwargs))
         else:
             if not allow_substitute and adapter_name in self.adapter_dict:
                 raise RuntimeError(
                     f'Adapter {adapter_class} already registered')
-            self.adapter_dict[adapter_name] = adapter_class
+            self.adapter_dict[adapter_name] = adapter_class(*args, **kwargs)
 
     def remove(self,
         adapter_name_or_class: AdapterNameOrClass
@@ -121,11 +140,11 @@ class BaseAdapterManager(abc.ABC):
         """
         if not adapter_classes:
             adapter_classes = [self.adapter_class]
-        if type(adapter_clasess) is not list:
+        if type(adapter_classes) is not list:
             adapter_classes = [adapter_classes]
 
         if not namespaces:
-            namespaces = [self.namespaces]
+            namespaces = self.namespaces
         if type(namespaces) is not list:
             namespaces = [namespaces]
 
