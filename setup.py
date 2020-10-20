@@ -21,6 +21,7 @@ with open('LICENSE') as f:
 install_requires = [
     'pyyaml',
     'marshmallow',
+    'click',
 ]
 
 setup(

@@ -6,12 +6,10 @@
 # Copyright (c) 2019-2020 TropiCoders Karol Tomala
 #
 
-import tcutils.adapters
-import tcutils.config
-import tcutils.const
-import tcutils.fs
-import tcutils.funcutils
-import tcutils.paths
-import tcutils.types
-import tcutils.user
-import tcutils.yamlinclude
+import pytest
+
+from ..context import tcutils
+
+
+class TestAdapters:
+    pass
