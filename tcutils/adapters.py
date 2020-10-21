@@ -9,11 +9,41 @@
 import abc
 import typing
 import sys
+import click
 from dataclasses import dataclass, field
+from functools import update_wrapper
+from click.globals import get_current_context
 
 from tcutils.const import DEFAULT_ADAPTER_METHOD
 from tcutils.types import AdapterNameOrClass, AdapterManagerNamespaces
 from tcutils.funcutils import module_classes
+
+
+def adapter_command(name=None, cls=None, **attrs):
+    """Decorator for adding Click command within Adapter.
+    """
+    if cls is None:
+        cls = click.Command
+
+    def decorator(func):
+        func._adapter_command = True
+        func._adapter_command_name = name
+        func._adapter_command_cls = cls
+        func._adapter_command_attrs = attrs
+        return func
+    return decorator
+
+
+def adapter_pass_context(f):
+    """Decorator for passing click context as second argument for Adapter.
+    """
+
+    def new_func(*args, **kwargs):
+        if args:
+            args = args[:1] + (get_current_context(),) + args[1:]
+        return f(*args, **kwargs)
+
+    return update_wrapper(new_func, f)
 
 
 @dataclass
@@ -23,6 +53,32 @@ class BaseAdapter(abc.ABC):
     @abc.abstractmethod
     def execute(self, *args, **kwargs):
         raise NotImplementedError
+
+
+@dataclass
+class BaseCliAdapter(BaseAdapter):
+    cli_group: str
+
+    def _get_command_functions(self):
+        items = [item for item in dir(self)]
+        methods = list(map(lambda x: getattr(self, x), items))
+        return [item for item in methods
+            if hasattr(item, '_adapter_command')
+            and getattr(item, '_adapter_command')]
+
+    def cli_commands(self):
+        commands = []
+        for f in self._get_command_functions():
+            name = f._adapter_command_name
+            attrs = f._adapter_command_attrs
+            cls = f._adapter_command_cls
+            params = f.__click_params__
+            cmd = click.decorators._make_command(f, name, attrs, cls)
+            # Not sure why is this needed
+            cmd.params = params
+            cmd.__doc__ = f.__doc__
+            commands.append(cmd)
+        return commands
 
 
 @dataclass
@@ -72,6 +128,12 @@ class BaseAdapterManager(abc.ABC):
             return result
         else:
             return list(self.adapter_dict.keys())
+
+    def __iter__(self):
+        """Iterate over registered adapters.
+        """
+        for adapter_name in self.adapter_dict:
+            yield adapter_name
 
     def execute(self,
         adapter_name_or_class: AdapterNameOrClass,
@@ -165,7 +227,13 @@ class BaseAdapterManager(abc.ABC):
                         raise ValueError(
                             f'Unknown namespace `{namespace}` to scan')
             else:
-                modules_to_search.append(namespace)
+                if recursive_search:
+                    modules_to_search.extend([
+                        module_name for module_name in loaded_namespaces
+                        if module_name.startswith(namespace)
+                    ])
+                else:
+                    modules_to_search.append(namespace)
 
         found_adapters = []
         for module_name in modules_to_search:
@@ -174,4 +242,7 @@ class BaseAdapterManager(abc.ABC):
                 found_adapters.extend(module_classes(module, adapter_class))
 
         for found_adapter in found_adapters:
+            # Skip abstract classes
+            if found_adapter.__abstractmethods__:
+                continue
             self.register(found_adapter, *args, **kwargs)
