@@ -22,8 +22,7 @@ def cli_add_groups(
         for group_function in vars(group_module).values()
         if isinstance(group_function, click.Group)
     ]
-
-    parent_add_group = getattr(parent, 'group')
+    parent_add_group = getattr(parent, 'add_command')
     for group_function in groups:
         parent_add_group(group_function)
 
@@ -42,3 +41,20 @@ def cli_add_commands(
     parent_add_command = getattr(parent, 'add_command')
     for command_function in commands:
         parent_add_command(command_function)
+
+
+def cli_register_command_group(manager, cli_parent):
+    manager.scan()
+    for adapter_name in manager:
+        adapter = manager.get(adapter_name)
+        commands = adapter.cli_commands()
+        cli_group_kwargs = adapter.cli_group_kwargs
+        if not cli_group_kwargs:
+            cli_group_kwargs = {}
+        cli_group = click.Group(
+            name=adapter.cli_group,
+            **cli_group_kwargs
+        )
+        for command in commands:
+            cli_group.add_command(command)
+        cli_parent.add_command(cli_group)

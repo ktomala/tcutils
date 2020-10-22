@@ -79,6 +79,12 @@ def join_paths(
     return joined_path
 
 
+def make_relative_path(path: UniversalPath) -> pathlib.Path:
+    """Strip leading / from path to make it relative.
+    """
+    return pathlib.Path(str(path)[1:]) if str(path).startswith('/') else path
+
+
 # Directory functions
 
 

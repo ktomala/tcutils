@@ -72,7 +72,7 @@ class BaseCliAdapter(BaseAdapter):
             name = f._adapter_command_name
             attrs = f._adapter_command_attrs
             cls = f._adapter_command_cls
-            params = f.__click_params__
+            params = f.__click_params__ if hasattr(f, '__click_params__') else []
             cmd = click.decorators._make_command(f, name, attrs, cls)
             # Not sure why is this needed
             cmd.params = params
