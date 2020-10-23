@@ -7,7 +7,7 @@
 #
 
 import pathlib
-from marshmallow import fields
+from marshmallow import fields, ValidationError
 
 from tcutils.fs import PosixPermissions
 
@@ -22,7 +22,10 @@ class PathField(fields.Field):
         return str(value)
 
     def _deserialize(self, value, attr, data, **kwargs):
-        return pathlib.Path(value)
+        try:
+            return pathlib.Path(value)
+        except Exception as e:
+            raise ValidationError(f'{e}')
 
 
 class PosixPermissionsField(fields.Field):
@@ -36,4 +39,7 @@ class PosixPermissionsField(fields.Field):
         return str(value)
 
     def _deserialize(self, value, attr, data, **kwargs):
-        return PosixPermissions.from_octal(value)
+        try:
+            return PosixPermissions.from_octal(value)
+        except Exception as e:
+            raise ValidationError(f'{e}')
