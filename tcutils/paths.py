@@ -135,9 +135,18 @@ def create_dirs(
 
 
 def temp_system_dir_path():
-    """Return temporary system directory path."""
+    """Return temporary system directory path.
+    """
     temp_file = tempfile.TemporaryFile()
     return pathlib.Path(tempfile.tempdir)
+
+
+def list_dir(path: UniversalPath, recursive: bool=False):
+    """List directory contents.
+    """
+    path = check_path(path)
+    glob_pattern = '**/*' if recursive else '*'
+    return path.glob(glob_pattern)
 
 
 # File functions
