@@ -33,7 +33,7 @@ setup(
     author='Karol Tomala',
     author_email='ktomala@tropicoders.pl',
     url='https://github.com/ktomala/tcutils',
-    license=license,
+    license='MPL 2.0',
     packages=find_packages(exclude=('tests', 'docs')),
     classifiers=[
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
