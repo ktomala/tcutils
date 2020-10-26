@@ -147,9 +147,12 @@ def open_uri(
             default_input_stream.name = '<stream>'
         return default_input_stream
     # Reading from URI
-    if not uri.startswith('/'):
-        uri = str(pathlib.Path().cwd() / uri)
     parsed_uri = urllib.request.urlparse(uri)
     if parsed_uri.scheme == '':
         parsed_uri = parsed_uri._replace(scheme=default_uri_scheme)
+        if default_uri_scheme == 'file':
+            uri_path = parsed_uri.path
+            if not uri_path.startswith('/'):
+                uri_path = str(pathlib.Path().cwd() / uri_path)
+                parsed_uri = parsed_uri._replace(path=uri_path)
     return urllib.request.urlopen(parsed_uri.geturl(), *args, **kwargs)
