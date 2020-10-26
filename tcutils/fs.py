@@ -147,6 +147,8 @@ def open_uri(
             default_input_stream.name = '<stream>'
         return default_input_stream
     # Reading from URI
+    if not uri.startswith('/'):
+        uri = str(pathlib.Path().cwd() / uri)
     parsed_uri = urllib.request.urlparse(uri)
     if parsed_uri.scheme == '':
         parsed_uri = parsed_uri._replace(scheme=default_uri_scheme)
