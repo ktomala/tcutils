@@ -6,10 +6,16 @@
 # Copyright (c) 2019-2020 TropiCoders Karol Tomala
 #
 
-import pwd
+try:
+    import pwd
+except ModuleNotFoundError:
+    import getpass
 import os
 
 
 def current_user_name() -> str:
     """Return current user name."""
-    return pwd.getpwuid(os.getuid())[0]
+    try:
+        return pwd.getpwuid(os.getuid())[0]
+    except NameError:
+        return getpass.getuser()
