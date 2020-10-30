@@ -148,11 +148,19 @@ def open_uri(
         return default_input_stream
     # Reading from URI
     parsed_uri = urllib.request.urlparse(uri)
-    if parsed_uri.scheme == '':
+    uri_scheme = parsed_uri.scheme
+    if uri_scheme == '' or len(uri_scheme) == 1:
+        # Set drive path if it's local Windows path
+        uri_drive_path = uri_scheme if len(uri_scheme) == 1 else ''
         parsed_uri = parsed_uri._replace(scheme=default_uri_scheme)
         if default_uri_scheme == 'file':
-            uri_path = parsed_uri.path
-            if not uri_path.startswith('/'):
-                uri_path = str(pathlib.Path().cwd() / uri_path)
+            if uri_drive_path:
+                uri_path = str(
+                    pathlib.Path(uri_drive_path) / parsed_uri.path).resolve())
                 parsed_uri = parsed_uri._replace(path=uri_path)
+            else:
+                uri_path = parsed_uri.path
+                if not uri_path.startswith('/'):
+                    uri_path = str(pathlib.Path().cwd() / uri_path)
+                    parsed_uri = parsed_uri._replace(path=uri_path)
     return urllib.request.urlopen(parsed_uri.geturl(), *args, **kwargs)
