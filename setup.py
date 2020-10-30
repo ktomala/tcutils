@@ -26,7 +26,7 @@ install_requires = [
 
 setup(
     name='tcutils',
-    version='0.2.1',
+    version='0.2.2',
     description='TropiCoders Utility Library',
     long_description=readme,
     long_description_content_type="text/markdown",
