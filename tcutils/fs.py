@@ -156,7 +156,7 @@ def open_uri(
         if default_uri_scheme == 'file':
             if uri_drive_path:
                 uri_path = str(
-                    pathlib.Path(uri_drive_path) / parsed_uri.path).resolve())
+                    (pathlib.Path(uri_drive_path) / parsed_uri.path).resolve())
                 parsed_uri = parsed_uri._replace(path=uri_path)
             else:
                 uri_path = parsed_uri.path
