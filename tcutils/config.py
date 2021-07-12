@@ -40,14 +40,34 @@ class ConfigurationAttribute:
 
     def __str__(self) -> str:
         return str(self.value)
+    
+    # def __dict__(self):
+        # return dict(self.value)
 
-    def __getattr__(self, attr_name) -> typing.Any:
+    def __repr__(self):
+        return str(dict(self.value))
+    
+    def keys(self):
+        return dict(self.value).keys()
+    
+    def __getattr__(self, attr_name: str) -> typing.Any:
         attr_suffix = None
+        if type(attr_name) == int:
+            try:
+                value = object.__getattribute__(self, 'value')
+            except:
+                raise IndexError(f'{self} value is not iterable.')
+            attr_name = list(value.items())[attr_name][0]
         if attr_name.find('.') > -1:
             attr_name, attr_suffix = attr_name.split('.', 1)
         if attr_name not in dir(self):
             if attr_name not in object.__getattribute__(self, 'value'):
-                raise AttributeError(f'No such attribute: {attr_name}')
+                long_attr_name = f'{attr_name}.{attr_suffix}'
+                if long_attr_name not in dir(self):
+                    if long_attr_name not in object.__getattribute__(self, 'value'):
+                        raise AttributeError(f'No such attribute: {attr_name}')
+                attr_name = long_attr_name
+                attr_suffix = None
             attr_value = getattr(self, 'value').get(attr_name)
             if type(attr_value) is dict:
                 attr_value = ConfigurationAttribute(attr_value)
@@ -56,6 +76,9 @@ class ConfigurationAttribute:
         if attr_suffix:
             attr_value = getattr(attr_value, attr_suffix)
         return attr_value
+    
+    def __getitem__(self, item_name: str) -> typing.Any:
+        return self.__getattr__(item_name)
 
 
 class Configuration:
@@ -73,16 +96,33 @@ class Configuration:
     def __str__(self) -> str:
         return f'Configuration({self.config})'
 
+    # def __dict__(self):
+        # return dict(self.config)
+
+    def keys(self):
+        return dict(self.config).keys()
+
     def __getitem__(self, k: str) -> typing.Any:
         return self.config.get(k)
 
     def __getattr__(self, attr_name: str) -> typing.Any:
         attr_suffix = None
+        if type(attr_name) == int:
+            try:
+                value = object.__getattribute__(self, 'value')
+            except:
+                raise IndexError(f'{self} value is not iterable.')
+            attr_name = list(value.items())[attr_name][0]
         if attr_name.find('.') > -1:
             attr_name, attr_suffix = attr_name.split('.', 1)
         if attr_name not in dir(self):
             if attr_name not in object.__getattribute__(self, 'config'):
-                raise AttributeError(f'No such attribute: {attr_name}')
+                long_attr_name = f'{attr_name}.{attr_suffix}'
+                if long_attr_name not in dir(self):
+                    if long_attr_name not in object.__getattribute__(self, 'config'):
+                        raise AttributeError(f'No such attribute: {attr_name}')
+                attr_name = long_attr_name
+                attr_suffix = None
             attr_value = getattr(self, 'config').get(attr_name)
             if type(attr_value) is dict:
                 attr_value = ConfigurationAttribute(attr_value)
