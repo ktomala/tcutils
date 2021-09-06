@@ -40,16 +40,16 @@ class ConfigurationAttribute:
 
     def __str__(self) -> str:
         return str(self.value)
-    
+
     # def __dict__(self):
         # return dict(self.value)
 
     def __repr__(self):
         return str(dict(self.value))
-    
+
     def keys(self):
         return dict(self.value).keys()
-    
+
     def __getattr__(self, attr_name: str) -> typing.Any:
         attr_suffix = None
         if type(attr_name) == int:
@@ -76,7 +76,7 @@ class ConfigurationAttribute:
         if attr_suffix:
             attr_value = getattr(attr_value, attr_suffix)
         return attr_value
-    
+
     def __getitem__(self, item_name: str) -> typing.Any:
         return self.__getattr__(item_name)
 
@@ -152,7 +152,7 @@ class Configuration:
             schema_class = BaseConfigSchema
         schema = schema_class(*schema_args, **schema_kwargs)
         try:
-            result = schema.load(config_dict)
+            result = schema.dump(schema.load(dict(config_dict)))
         except ValidationError as e:
             log.error(f'Configuration file error: "{e.args}"')
             raise e
